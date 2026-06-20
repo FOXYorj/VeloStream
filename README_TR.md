@@ -32,6 +32,13 @@
 - 🎨 **Modern ve Çift Dilli UI:** İçinde hem İngilizce hem de Türkçe desteği barındıran muazzam bir dark-mode arayüzü.
 - 🛠 **Hafif Backend:** İnanılmaz eşzamanlılık (concurrency) hızı ve düşük bellek tüketimi için tamamen Go (Golang) ile geliştirildi.
 
+## 📸 Ekran Görüntüleri
+
+<div align="center">
+  <img src="screenshots/desktop.png" alt="Masaüstü Arayüzü" width="600" style="border-radius: 8px; margin-right: 10px;" />
+  <img src="screenshots/mobile.png" alt="Mobil Arayüz" width="280" style="border-radius: 8px;" />
+</div>
+
 ## 🏗 Nasıl Çalışır?
 
 1. **Go Backend:** HTML/JS/CSS dosyalarını HTTP üzerinden sunar ve bir WebSocket Hub'ı yönetir. Aynı zamanda ağdaki diğer VeloStream sunucularını bulmak için UDP paketleri yayar.

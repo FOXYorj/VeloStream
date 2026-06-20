@@ -32,6 +32,13 @@ No internet routing, no cloud servers, no subscriptions. Just raw, pure local pe
 - 🎨 **Modern Bilingual UI:** Beautiful dark-mode dashboard with built-in English (EN) and Turkish (TR) support.
 - 🛠 **Lightweight Backend:** Built entirely in Go (Golang) for incredible concurrency and low memory footprint.
 
+## 📸 Screenshots
+
+<div align="center">
+  <img src="screenshots/desktop.png" alt="Desktop UI" width="600" style="border-radius: 8px; margin-right: 10px;" />
+  <img src="screenshots/mobile.png" alt="Mobile UI" width="280" style="border-radius: 8px;" />
+</div>
+
 ## 🏗 How It Works
 
 1. **The Go Backend:** Serves the HTML/JS/CSS files over HTTP and manages a WebSocket Hub. It also broadcasts UDP packets to discover other VeloStream servers on the network.
