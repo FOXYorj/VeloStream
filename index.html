@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="VeloStream — Pure P2P local network streaming. Zero-latency, no cloud." />
+  <title>VeloStream</title>
+
+  <link rel="stylesheet" href="css/reset.css" />
+  <link rel="stylesheet" href="css/design-tokens.css" />
+  <link rel="stylesheet" href="css/style.css" />
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23080c12'/%3E%3Ccircle cx='16' cy='16' r='7' fill='none' stroke='%2300d4e8' stroke-width='1.5'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%2300d4e8'/%3E%3C/svg%3E" />
+</head>
+<body>
+
+<canvas id="particle-canvas" aria-hidden="true"></canvas>
+
+<div id="app">
+
+  <!-- ─── Navbar ─────────────────────── -->
+  <nav class="nav">
+    <div class="nav-brand">
+      <svg class="nav-logo" viewBox="0 0 30 30" fill="none">
+        <circle cx="15" cy="15" r="13" fill="none" stroke="#00d4e8" stroke-width="1" opacity=".3"/>
+        <circle cx="15" cy="15" r="8"  fill="none" stroke="#00d4e8" stroke-width="1" stroke-dasharray="3 3" opacity=".5"/>
+        <circle cx="15" cy="15" r="3.5" fill="#00d4e8"/>
+      </svg>
+      <span class="nav-name">VeloStream</span>
+      <span class="nav-badge">v0.9 beta</span>
+    </div>
+
+    <div class="nav-spacer"></div>
+
+    <div class="nav-right">
+      <div class="status-pill online" id="net-pill">
+        <span class="status-dot"></span>
+        <span data-i18n="nav.online">Local Network</span>
+      </div>
+
+      <div class="lang-toggle" role="group" aria-label="Language">
+        <div class="lang-thumb" id="lang-thumb"></div>
+        <button class="lang-btn" id="lang-tr">TR</button>
+        <button class="lang-btn active" id="lang-en">EN</button>
+      </div>
+
+      <button class="icon-btn" id="btn-settings" aria-label="Settings">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+        </svg>
+      </button>
+
+      <time class="nav-clock" id="clock">00:00:00</time>
+    </div>
+  </nav>
+
+  <!-- ─── Main content ───────────────── -->
+  <main class="main">
+
+    <!-- Hero -->
+    <section class="card hero" aria-label="Broadcast control">
+      <div>
+        <p class="hero-eyebrow" data-i18n="hero.eyebrow">BROADCAST STATUS</p>
+        <h1 class="hero-title">
+          <span data-i18n="hero.title">Stream Anything.</span><br>
+          <span style="color:var(--cyan)" data-i18n="hero.accent">Instantly.</span>
+        </h1>
+
+        <div class="hero-meta">
+          <div class="meta-row">
+            <span class="meta-key" data-i18n="hero.host">Host</span>
+            <span class="meta-val" id="val-host">—</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-key" data-i18n="hero.ip">IP Address</span>
+            <span class="meta-val" id="val-ip">—</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-key" data-i18n="hero.port">Port</span>
+            <span class="meta-val" id="val-port">7432</span>
+          </div>
+        </div>
+
+        <div class="hero-btns">
+          <button class="btn btn-primary" id="btn-start">
+            <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z"/>
+            </svg>
+            <span data-i18n="hero.start">Start Broadcasting</span>
+          </button>
+          <button class="btn btn-danger" id="btn-stop">
+            <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24">
+              <path fill-rule="evenodd" d="M4.5 7.5a3 3 0 0 1 3-3h9a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3h-9a3 3 0 0 1-3-3v-9Z" clip-rule="evenodd"/>
+            </svg>
+            <span data-i18n="hero.stop">Stop</span>
+          </button>
+          <button class="btn btn-ghost" id="btn-copy">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"/>
+            </svg>
+            <span data-i18n="hero.copy">Copy Link</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Ring -->
+      <div class="ring-wrap" aria-hidden="true">
+        <div id="ripples" style="position:absolute;inset:0;border-radius:50%">
+          <div class="ripple"></div>
+          <div class="ripple"></div>
+          <div class="ripple"></div>
+        </div>
+        <svg class="ring-svg" viewBox="0 0 180 180">
+          <circle class="r-outer" cx="90" cy="90" r="85"/>
+          <circle class="r-inner" cx="90" cy="90" r="65"/>
+        </svg>
+        <div class="ring-center">
+          <div class="ring-icon" id="ring-icon">
+            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 0 1 7.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 0 1 1.06 0Z"/>
+            </svg>
+          </div>
+          <span class="ring-label off" id="ring-label" data-i18n="hero.off">STANDBY</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <div class="stats" role="region" aria-label="Statistics">
+      <div class="card stat">
+        <div class="stat-icon c">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="stat-val" id="val-peers">0</div>
+          <div class="stat-key" data-i18n="stat.peers">Peers</div>
+        </div>
+      </div>
+
+      <div class="card stat">
+        <div class="stat-icon v">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="stat-val" id="val-latency">—</div>
+          <div class="stat-key" data-i18n="stat.latency">Avg Latency</div>
+        </div>
+      </div>
+
+      <div class="card stat">
+        <div class="stat-icon g">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="stat-val" id="val-bitrate">—</div>
+          <div class="stat-key" data-i18n="stat.bitrate">Throughput</div>
+        </div>
+      </div>
+
+      <div class="card stat">
+        <div class="stat-icon y">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="stat-val" id="val-uptime">00:00</div>
+          <div class="stat-key" data-i18n="stat.uptime">Uptime</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Peers -->
+    <section>
+      <div class="sec-hd">
+        <h2 class="sec-title">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8.288 15.038a5.25 5.25 0 0 1 7.424 0M5.106 11.856c3.807-3.808 9.98-3.808 13.788 0M1.924 8.674c5.565-5.565 14.587-5.565 20.152 0M12.53 18.22l-.53.53-.53-.53a.75.75 0 0 1 1.06 0Z"/>
+          </svg>
+          <span data-i18n="peers.title">Peer Discovery</span>
+        </h2>
+        <span class="sec-count"><span id="peer-count">0</span> online</span>
+      </div>
+      <div class="peer-grid" id="peer-grid" role="list"></div>
+    </section>
+
+    <!-- Streams -->
+    <section>
+      <div class="sec-hd">
+        <h2 class="sec-title">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z"/>
+          </svg>
+          <span data-i18n="streams.title">Active Streams</span>
+        </h2>
+        <span class="sec-count"><span id="stream-count">0</span> active</span>
+      </div>
+      <div class="streams-list" id="stream-list" role="list"></div>
+    </section>
+
+    <!-- Roadmap -->
+    <section>
+      <div class="sec-hd">
+        <h2 class="sec-title">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.59 14.37a6 6 0 0 1-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 0 0 6.16-12.12A14.98 14.98 0 0 0 9.631 8.41m5.96 5.96a14.926 14.926 0 0 1-5.841 2.58m-.119-8.54a6 6 0 0 0-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 0 0-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 0 1-2.448-2.448 14.9 14.9 0 0 1 .06-.312m-2.24 2.39a4.493 4.493 0 0 0-1.757 4.306 4.493 4.493 0 0 0 4.306-1.758M16.5 9a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z"/>
+          </svg>
+          <span data-i18n="roadmap.title">Roadmap</span>
+        </h2>
+      </div>
+      <div class="roadmap-scroll">
+
+        <article class="card rm-card" style="border-color: rgba(16, 185, 129, 0.3);">
+          <div class="rm-icon g">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 0 1 0 12.728M16.463 8.288a5.25 5.25 0 0 1 0 7.424M6.75 8.25l4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.757 3.63 8.25 4.51 8.25H6.75Z"/>
+            </svg>
+          </div>
+          <div class="rm-label" style="color: var(--green); background: rgba(16, 185, 129, 0.1);" data-i18n="roadmap.done">Completed</div>
+          <div class="rm-title" data-i18n="rm.audio.title">Virtual Audio Cable</div>
+          <p class="rm-desc"   data-i18n="rm.audio.desc">Stream per-app audio without mixing system sound.</p>
+        </article>
+
+        <article class="card rm-card">
+          <div class="rm-icon c">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"/>
+            </svg>
+          </div>
+          <div class="rm-label" data-i18n="roadmap.soon">Coming soon</div>
+          <div class="rm-title" data-i18n="rm.mobile.title">Mobile Receiver</div>
+          <p class="rm-desc"   data-i18n="rm.mobile.desc">Use any tablet or phone as a zero-lag secondary display.</p>
+        </article>
+
+        <article class="card rm-card">
+          <div class="rm-icon g">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z"/>
+            </svg>
+          </div>
+          <div class="rm-label" data-i18n="roadmap.soon">Coming soon</div>
+          <div class="rm-title" data-i18n="rm.rec.title">Stream Recording</div>
+          <p class="rm-desc"   data-i18n="rm.rec.desc">Record streams to disk in H.264/VP9.</p>
+        </article>
+
+        <article class="card rm-card">
+          <div class="rm-icon y">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z"/>
+            </svg>
+          </div>
+          <div class="rm-label" data-i18n="roadmap.soon">Coming soon</div>
+          <div class="rm-title" data-i18n="rm.multi.title">Multi-Cast</div>
+          <p class="rm-desc"   data-i18n="rm.multi.desc">Broadcast to multiple receivers with bandwidth balancing.</p>
+        </article>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ─── Footer ──────────────────────── -->
+  <footer class="footer">
+    <p class="footer-left" data-i18n="footer.copy">© 2025 VeloStream — Pure P2P, no cloud.</p>
+    <nav class="footer-links">
+      <a href="#" class="footer-link" data-i18n="footer.docs">Docs</a>
+      <a href="#" class="footer-link" data-i18n="footer.github">GitHub</a>
+      <a href="#" class="footer-link" data-i18n="footer.issues">Issues</a>
+    </nav>
+  </footer>
+
+</div><!-- /#app -->
+
+<!-- ─── Settings Drawer ─────────────── -->
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="Settings">
+  <div class="drawer-hd">
+    <span class="drawer-hd-title" data-i18n="nav.settings">Settings</span>
+    <button class="icon-btn" id="btn-drawer-close" aria-label="Close">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
+      </svg>
+    </button>
+  </div>
+  <div class="drawer-body">
+    <div class="s-group">
+      <p class="s-group-title" data-i18n="s.network">Network</p>
+      <div class="s-row">
+        <label class="s-label" for="s-port" data-i18n="s.port">UDP Port</label>
+        <input class="s-input" id="s-port" type="number" value="7432" min="1024" max="65535"/>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ─── Video Modal (Receiver) ─────────────── -->
+<div class="player-modal" id="player-modal" style="display:none; position:fixed; inset:0; background:#000; z-index:9999; flex-direction:column;">
+  <div style="padding:16px; display:flex; gap:8px; justify-content:flex-end; background:linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); position:absolute; top:0; left:0; right:0; z-index:2;">
+    <button class="btn btn-primary btn-sm" onclick="if(window.webrtcManager) window.webrtcManager.goFullscreen()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 1v4m0 0h-4m4 0l-5-5"/></svg>
+    </button>
+    <button class="btn btn-danger btn-sm" onclick="if(window.webrtcManager) window.webrtcManager.closePlayerModal()">
+      Close Stream
+    </button>
+  </div>
+  <video id="remote-video" autoplay playsinline controls style="width:100%; height:100%; object-fit:contain;"></video>
+</div>
+
+<!-- Local Preview HUD -->
+<video id="local-video" autoplay muted playsinline style="display:none; position:fixed; bottom:20px; right:20px; width:200px; border-radius:8px; border:1px solid var(--border-color); z-index:900; box-shadow:0 8px 32px rgba(0,0,0,0.5);"></video>
+
+<script src="js/i18n.js"></script>
+<script src="js/particles.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/peers.js"></script>
+<script src="js/streams.js"></script>
+<script src="js/webrtc.js"></script>
+<script src="js/app.js"></script>
+
+<!-- Ripple CSS for active broadcast -->
+<style>
+  #ripples .ripple { animation: none; opacity: 0; }
+  #ripples.active-ripples .ripple { animation: ripple-out 2.4s ease-out infinite; }
+  #ripples.active-ripples .ripple:nth-child(2) { animation-delay: .8s; }
+  #ripples.active-ripples .ripple:nth-child(3) { animation-delay: 1.6s; }
+</style>
+
+</body>
+</html>
