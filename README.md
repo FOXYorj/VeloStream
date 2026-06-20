@@ -4,6 +4,11 @@
   <p><strong>Pure P2P Local Network Streaming. Zero-latency, no cloud.</strong></p>
 
   <p>
+    <a href="README.md">🇬🇧 English</a> •
+    <a href="README_TR.md">🇹🇷 Türkçe</a>
+  </p>
+
+  <p>
     <a href="#features">Features</a> •
     <a href="#how-it-works">How it Works</a> •
     <a href="#installation">Installation</a> •
