@@ -35,8 +35,8 @@ No internet routing, no cloud servers, no subscriptions. Just raw, pure local pe
 ## 📸 Screenshots
 
 <div align="center">
-  <img src="screenshots/desktop.svg" alt="Desktop UI" width="600" style="border-radius: 8px; margin-right: 10px;" />
-  <img src="screenshots/mobile.svg" alt="Mobile UI" width="280" style="border-radius: 8px;" />
+  <img src="screenshots/desktop.png" alt="Desktop UI" width="600" style="border-radius: 8px; margin-right: 10px;" />
+  <img src="screenshots/mobile.png" alt="Mobile UI" width="280" style="border-radius: 8px;" />
 </div>
 
 ## 🏗 How It Works
