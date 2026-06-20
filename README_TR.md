@@ -35,8 +35,8 @@
 ## 📸 Ekran Görüntüleri
 
 <div align="center">
-  <img src="screenshots/desktop.png" alt="Masaüstü Arayüzü" width="600" style="border-radius: 8px; margin-right: 10px;" />
-  <img src="screenshots/mobile.png" alt="Mobil Arayüz" width="280" style="border-radius: 8px;" />
+  <img src="screenshots/desktop.svg" alt="Masaüstü Arayüzü" width="600" style="border-radius: 8px; margin-right: 10px;" />
+  <img src="screenshots/mobile.svg" alt="Mobil Arayüz" width="280" style="border-radius: 8px;" />
 </div>
 
 ## 🏗 Nasıl Çalışır?
