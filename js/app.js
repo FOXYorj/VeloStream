@@ -227,5 +227,6 @@ document.addEventListener('DOMContentLoaded', () => {
   window.webrtcManager = new WebRTCManager();
   window.peerManager   = new PeerManager('peer-grid');
   window.streamMonitor = new StreamMonitor('stream-list');
+  window.monitorMode   = new MonitorMode();
   window.app           = new App();
 });

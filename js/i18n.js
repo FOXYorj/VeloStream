@@ -37,6 +37,7 @@ const TRANSLATIONS = {
     'streams.empty.sub':   'Start broadcasting or connect to a peer to see streams here.',
     'streams.btn.pause':   'Pause',
     'streams.btn.stop':    'Stop',
+    'streams.btn.monitor': 'Monitor Mode',
 
     'roadmap.title': 'Roadmap',
     'roadmap.soon':  'Coming soon',
@@ -102,6 +103,7 @@ const TRANSLATIONS = {
     'streams.empty.sub':   'Yayın başlatmak veya bir cihaza bağlanmak için yukarıdaki butonu kullanın.',
     'streams.btn.pause':   'Duraklat',
     'streams.btn.stop':    'Durdur',
+    'streams.btn.monitor': 'Monitör Yap',
 
     'roadmap.title': 'Yol Haritası',
     'roadmap.soon':  'Yakında',

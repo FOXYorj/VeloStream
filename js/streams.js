@@ -90,6 +90,13 @@ class StreamMonitor {
           <div class="stream-actions">
             <button class="btn btn-ghost btn-sm" onclick="streamMonitor.watchStream('${s.id}')"
               data-i18n="peers.btn.connect">${i18n.t('peers.btn.connect')}</button>
+            <button class="btn btn-primary btn-sm" onclick="streamMonitor.startMonitorMode('${s.id}')"
+              style="display:flex;align-items:center;gap:5px;">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0H3"/>
+              </svg>
+              <span data-i18n="streams.btn.monitor">${i18n.t('streams.btn.monitor')}</span>
+            </button>
           </div>
         </div>`;
       this.el.appendChild(card);
@@ -107,9 +114,15 @@ class StreamMonitor {
 
   watchStream(streamId) {
     if (window.webrtcManager) {
-      // streamId is usually "stream-CLIENTID", we need the target client ID
       const targetId = streamId.replace('stream-', '');
       window.webrtcManager.watchStream(targetId);
+    }
+  }
+
+  startMonitorMode(streamId) {
+    const targetId = streamId.replace('stream-', '');
+    if (window.monitorMode) {
+      window.monitorMode.start(targetId);
     }
   }
 

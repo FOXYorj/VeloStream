@@ -77,8 +77,13 @@ class WebRTCManager {
   }
 
   // 2. Watch a Stream (Receiver side creates Offer)
-  async watchStream(targetID) {
+  async watchStream(targetID, onStreamCallback) {
     console.log('[WebRTC] Creating offer for:', targetID);
+
+    // Store callback for when stream arrives
+    if (onStreamCallback) this._streamCallbacks = this._streamCallbacks || {};
+    if (onStreamCallback) this._streamCallbacks[targetID] = onStreamCallback;
+
     const pc = this._createPeerConnection(targetID);
     
     // Add a transceiver to receive BOTH video and audio
@@ -90,7 +95,14 @@ class WebRTCManager {
 
     // Send offer to host
     window.app.sendSignal(targetID, 'SIGNAL_OFFER', offer);
-    this._showPlayerModal();
+
+    // Only show legacy player modal if no monitor mode callback
+    if (!onStreamCallback) this._showPlayerModal();
+  }
+
+  // Helper: get active peer connection for a target
+  _getActivePc(targetID) {
+    return this.peerConnections[targetID] || null;
   }
 
   // 3. Handle incoming Offer (Host side creates Answer)
@@ -149,17 +161,26 @@ class WebRTCManager {
 
     pc.ontrack = (event) => {
       console.log('[WebRTC] Received remote track');
+      const stream = event.streams[0];
+      if (!stream) return;
+
+      // Monitor Mode: callback varsa onu çağır
+      const cb = this._streamCallbacks?.[targetID];
+      if (cb) {
+        cb(stream);
+        return;
+      }
+
+      // Legacy: player modal
       const remoteVideo = document.getElementById('remote-video');
-      if (remoteVideo && event.streams[0]) {
-        if (remoteVideo.srcObject !== event.streams[0]) {
-          remoteVideo.srcObject = event.streams[0];
-          remoteVideo.play().catch(err => {
-            console.warn('[WebRTC] Autoplay prevented by browser', err);
-            remoteVideo.muted = true;
-            remoteVideo.play();
-            alert("Telefonunuz otomatik sesli oynatmayı engelledi. Sesi duymak için videonun üzerindeki kontrollerden (hoparlör simgesi) sesi açın.");
-          });
-        }
+      if (remoteVideo && remoteVideo.srcObject !== stream) {
+        remoteVideo.srcObject = stream;
+        remoteVideo.play().catch(err => {
+          console.warn('[WebRTC] Autoplay prevented by browser', err);
+          remoteVideo.muted = true;
+          remoteVideo.play();
+          alert("Telefonunuz otomatik sesli oynatmayı engelledi. Sesi duymak için videonun üzerindeki kontrollerden (hoparlör simgesi) sesi açın.");
+        });
       }
     };
 
@@ -168,6 +189,10 @@ class WebRTCManager {
       if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') {
         pc.close();
         delete this.peerConnections[targetID];
+        // Monitor Mode: yeniden bağlan
+        if (window.monitorMode?._active) {
+          window.monitorMode.onDisconnected();
+        }
       }
     };
 
