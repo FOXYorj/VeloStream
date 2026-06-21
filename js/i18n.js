@@ -51,6 +51,10 @@ const TRANSLATIONS = {
     'rm.rec.desc':    'Record streams to disk in H.264/VP9 with segment support.',
     'rm.multi.title': 'Multi-Cast',
     'rm.multi.desc':  'Broadcast to multiple receivers with bandwidth balancing.',
+    'rm.remote.title':'Remote Control',
+    'rm.remote.desc': 'Use your mobile device as a wireless mouse and keyboard.',
+    'rm.gpu.title':   'Hardware Accel',
+    'rm.gpu.desc':    'NVENC & AMF support for zero-impact host encoding.',
 
     'footer.copy':   '© 2025 VeloStream — Pure P2P, no cloud.',
     'footer.docs':   'Docs',
@@ -121,6 +125,10 @@ const TRANSLATIONS = {
     'rm.rec.desc':    'Gelen yayınları H.264/VP9 formatında diske kaydedin.',
     'rm.multi.title': 'Çoklu Yayın',
     'rm.multi.desc':  'Akıllı bant dengesiyle birden fazla alıcıya aynı anda yayın yapın.',
+    'rm.remote.title':'Uzaktan Kontrol',
+    'rm.remote.desc': 'Mobil cihazınızı PC için kablosuz fare ve klavye olarak kullanın.',
+    'rm.gpu.title':   'Donanım Hızlandırma',
+    'rm.gpu.desc':    'NVENC ve AMF desteğiyle işlemciyi yormadan sıfır gecikmeli yayın.',
 
     'footer.copy':   '© 2025 VeloStream — Saf P2P, bulut yok.',
     'footer.docs':   'Belgeler',
