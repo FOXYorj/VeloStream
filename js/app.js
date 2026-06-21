@@ -14,6 +14,7 @@ class App {
     this._lang();
     this._broadcast();
     this._settings();
+    this._authorModal();
     this._copyLink();
     this._initWs();
 
@@ -206,6 +207,24 @@ class App {
     comprEl?.addEventListener('input', () => {
       if (comprVal) comprVal.textContent = `${comprEl.value}%`;
     });
+  }
+
+  /* ── Author Modal ───────────── */
+  _authorModal() {
+    const btn = document.getElementById('btn-author');
+    const modal = document.getElementById('author-modal');
+    const closeBtn = document.getElementById('btn-author-close');
+
+    if (btn && modal && closeBtn) {
+      const open = () => { modal.style.display = 'flex'; };
+      const close = () => { modal.style.display = 'none'; };
+
+      btn.addEventListener('click', open);
+      closeBtn.addEventListener('click', close);
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) close();
+      });
+    }
   }
 
   /* ── Copy link ─────────────── */
