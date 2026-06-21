@@ -67,6 +67,10 @@ const TRANSLATIONS = {
     's.discovery':  'Auto Discovery',
     's.audioen':    'Audio Streaming',
     's.sysaudio':   'System Audio',
+
+    'author.projects':   'My Projects',
+    'author.vs.desc':    'Pure P2P Local Network Streaming. Zero-latency, no cloud.',
+    'author.share.desc': 'Secure file sharing project between devices on the local network.',
   },
 
   tr: {
@@ -133,6 +137,10 @@ const TRANSLATIONS = {
     's.discovery': 'Otomatik Keşif',
     's.audioen':   'Ses Yayını',
     's.sysaudio':  'Sistem Sesi',
+
+    'author.projects':   'Projelerim',
+    'author.vs.desc':    'Saf P2P Yerel Ağ Yayını. Sıfır gecikme, bulut yok.',
+    'author.share.desc': 'Yerel ağda cihazlar arası güvenli dosya paylaşımı projesi.',
   },
 };
 
