@@ -56,6 +56,9 @@ const TRANSLATIONS = {
     'rm.gpu.title':   'Hardware Accel',
     'rm.gpu.desc':    'NVENC & AMF support for zero-impact host encoding.',
 
+    'remote.banner.sub': 'Open the link on your phone to control this PC wirelessly',
+    'remote.banner.btn': 'Open Link',
+
     'footer.copy':   '© 2025 VeloStream — Pure P2P, no cloud.',
     'footer.docs':   'Docs',
     'footer.github': 'GitHub',
@@ -129,6 +132,9 @@ const TRANSLATIONS = {
     'rm.remote.desc': 'Mobil cihazınızı PC için kablosuz fare ve klavye olarak kullanın.',
     'rm.gpu.title':   'Donanım Hızlandırma',
     'rm.gpu.desc':    'NVENC ve AMF desteğiyle işlemciyi yormadan sıfır gecikmeli yayın.',
+
+    'remote.banner.sub': 'PC\'yi kablosuz kontrol etmek için linki telefonunuzda açın',
+    'remote.banner.btn': 'Linki Aç',
 
     'footer.copy':   '© 2025 VeloStream — Saf P2P, bulut yok.',
     'footer.docs':   'Belgeler',

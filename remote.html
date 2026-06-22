@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>VeloStream — Uzaktan Kontrol</title>
+  <style>
+    :root {
+      --bg:       #0a0a0f;
+      --card:     #11111a;
+      --border:   rgba(255,255,255,0.07);
+      --cyan:     #00d4e8;
+      --purple:   #8b5cf6;
+      --green:    #10b981;
+      --red:      #ef4444;
+      --text:     #e8e8f0;
+      --muted:    #6b7280;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      touch-action: none;
+      user-select: none;
+    }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      padding-top: max(14px, env(safe-area-inset-top));
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      gap: 10px;
+    }
+    .logo { display: flex; align-items: center; gap: 8px; }
+    .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+    .logo-text { font-size: 14px; font-weight: 700; letter-spacing: 1px; color: var(--text); }
+    .status-badge {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 11px; color: var(--muted);
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      border-radius: 20px; padding: 4px 10px;
+    }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
+    .status-dot.online { background: var(--green); box-shadow: 0 0 6px var(--green); }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .tab {
+      flex: 1; padding: 11px 8px; text-align: center; font-size: 12px; font-weight: 600;
+      letter-spacing: 0.5px; color: var(--muted); cursor: pointer; border: none; background: none;
+      transition: color 0.2s, border-bottom 0.2s; border-bottom: 2px solid transparent;
+    }
+    .tab.active { color: var(--cyan); border-bottom-color: var(--cyan); }
+
+    /* ── Panels ── */
+    .panel { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+    .panel.active { display: flex; }
+
+    /* ── Trackpad ── */
+    #trackpad {
+      flex: 1;
+      background: linear-gradient(135deg, #0d0d1a 0%, #0a0a14 100%);
+      border-radius: 0;
+      cursor: crosshair;
+      position: relative;
+      touch-action: none;
+      overflow: hidden;
+    }
+    #trackpad::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(rgba(0,212,232,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,232,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+    }
+    .trackpad-hint {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      text-align: center; color: var(--muted); font-size: 13px; pointer-events: none;
+      transition: opacity 0.5s;
+    }
+    .trackpad-hint svg { display: block; margin: 0 auto 8px; opacity: 0.3; }
+
+    /* Touch ripple */
+    .ripple-dot {
+      position: absolute; width: 40px; height: 40px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,212,232,0.4) 0%, transparent 70%);
+      transform: translate(-50%, -50%) scale(0);
+      animation: ripple-fade 0.4s ease-out forwards;
+      pointer-events: none;
+    }
+    @keyframes ripple-fade { to { transform: translate(-50%, -50%) scale(3); opacity: 0; } }
+
+    /* ── Mouse buttons ── */
+    .mouse-btns {
+      display: grid;
+      grid-template-columns: 1fr 4px 1fr;
+      height: 72px;
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .mouse-btn {
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 600; color: var(--muted);
+      cursor: pointer; transition: background 0.15s, color 0.15s;
+      gap: 6px; border: none; background: transparent;
+    }
+    .mouse-btn:active, .mouse-btn.pressed { background: rgba(0,212,232,0.1); color: var(--cyan); }
+    .mouse-divider { background: var(--border); }
+
+    /* ── Scroll strip ── */
+    .scroll-strip {
+      width: 52px; background: var(--card); border-left: 1px solid var(--border);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 4px; flex-shrink: 0;
+    }
+    .scroll-btn {
+      width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04); display: flex; align-items: center;
+      justify-content: center; cursor: pointer; color: var(--muted);
+      transition: background 0.15s, color 0.15s;
+    }
+    .scroll-btn:active { background: rgba(0,212,232,0.15); color: var(--cyan); }
+
+    /* trackpad + scroll side-by-side */
+    .trackpad-row { display: flex; flex: 1; overflow: hidden; }
+
+    /* ── Keyboard panel ── */
+    #panel-keyboard {
+      padding: 16px;
+      gap: 10px;
+      overflow-y: auto;
+    }
+    .kb-row { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+    .key {
+      min-width: 42px; height: 48px; padding: 0 8px;
+      border-radius: 8px; border: 1px solid var(--border);
+      background: rgba(255,255,255,0.04); color: var(--text);
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.1s, border-color 0.1s, transform 0.05s;
+      flex: 1; max-width: 70px;
+    }
+    .key:active { background: rgba(0,212,232,0.15); border-color: var(--cyan); transform: scale(0.94); }
+    .key.wide { flex: 2; max-width: 130px; }
+    .key.extra-wide { flex: 3; max-width: 200px; }
+    .key.special { color: var(--cyan); border-color: rgba(0,212,232,0.3); }
+    .key.destructive { color: var(--red); border-color: rgba(239,68,68,0.3); }
+
+    /* Text input row */
+    .text-row { display: flex; gap: 8px; align-items: center; }
+    .text-input {
+      flex: 1; height: 46px; padding: 0 14px; border-radius: 8px;
+      border: 1px solid var(--border); background: rgba(255,255,255,0.04);
+      color: var(--text); font-size: 14px; outline: none;
+      transition: border-color 0.2s;
+    }
+    .text-input:focus { border-color: var(--cyan); }
+    .text-send {
+      height: 46px; padding: 0 18px; border-radius: 8px;
+      background: var(--cyan); color: #000; font-weight: 700; font-size: 13px;
+      border: none; cursor: pointer;
+    }
+
+    /* Divider */
+    .kb-divider {
+      height: 1px; background: var(--border); margin: 4px 0;
+    }
+    .kb-label { font-size: 11px; color: var(--muted); letter-spacing: 0.5px; text-align: center; }
+
+    /* ── Connect overlay ── */
+    #overlay-connect {
+      position: fixed; inset: 0; background: var(--bg);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 100; padding: 30px; text-align: center; gap: 14px;
+    }
+    #overlay-connect.hidden { display: none; }
+    .connect-logo { font-size: 28px; font-weight: 800; color: var(--cyan); letter-spacing: 2px; }
+    .connect-sub { font-size: 14px; color: var(--muted); max-width: 280px; line-height: 1.5; }
+    .connect-spinner {
+      width: 36px; height: 36px; border: 3px solid var(--border);
+      border-top-color: var(--cyan); border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<!-- Connection overlay -->
+<div id="overlay-connect">
+  <div class="connect-logo">VeloStream</div>
+  <div class="connect-spinner"></div>
+  <div class="connect-sub">PC'ye bağlanıyor…<br><small id="connect-addr"></small></div>
+</div>
+
+<!-- Header -->
+<div class="header">
+  <div class="logo">
+    <div class="logo-dot"></div>
+    <span class="logo-text">UZAKTAN KONTROL</span>
+  </div>
+  <div class="status-badge">
+    <div class="status-dot" id="status-dot"></div>
+    <span id="status-text">Bağlanıyor</span>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <button class="tab active" id="tab-trackpad" onclick="switchTab('trackpad')">
+    🖱️ Trackpad
+  </button>
+  <button class="tab" id="tab-keyboard" onclick="switchTab('keyboard')">
+    ⌨️ Klavye
+  </button>
+</div>
+
+<!-- Trackpad Panel -->
+<div class="panel active" id="panel-trackpad">
+  <div class="trackpad-row">
+    <div id="trackpad">
+      <div class="trackpad-hint" id="trackpad-hint">
+        <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M15.042 21.672 13.684 16.6m0 0-2.51 2.225.569-9.47 5.227 7.917-3.286-.672Z"/></svg>
+        Sürükleyerek fareyi hareket ettir<br>
+        <small>Çift parmak = kaydır</small>
+      </div>
+    </div>
+    <div class="scroll-strip">
+      <button class="scroll-btn" id="scroll-up" onclick="scrollPage(3)">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="m5 15 7-7 7 7"/></svg>
+      </button>
+      <button class="scroll-btn" id="scroll-down" onclick="scrollPage(-3)">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="m19 9-7 7-7-7"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="mouse-btns">
+    <button class="mouse-btn" id="btn-left" ontouchstart="btnDown('btn-left')" ontouchend="leftClick()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8a5 5 0 0 1 5-5h8a5 5 0 0 1 5 5v8a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V8Z"/><path d="M12 3v18"/></svg>
+      Sol Tık
+    </button>
+    <div class="mouse-divider"></div>
+    <button class="mouse-btn" id="btn-right" ontouchstart="btnDown('btn-right')" ontouchend="rightClick()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8a5 5 0 0 1 5-5h8a5 5 0 0 1 5 5v8a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V8Z"/><path d="M12 3v18"/></svg>
+      Sağ Tık
+    </button>
+  </div>
+</div>
+
+<!-- Keyboard Panel -->
+<div class="panel" id="panel-keyboard">
+  <!-- Text send -->
+  <div class="text-row">
+    <input class="text-input" id="text-input" placeholder="Metin yaz ve gönder…" />
+    <button class="text-send" onclick="sendText()">Gönder</button>
+  </div>
+
+  <div class="kb-divider"></div>
+  <div class="kb-label">KISAYOLLAR</div>
+
+  <!-- Shortcuts row -->
+  <div class="kb-row">
+    <button class="key special" onclick="sendShortcut([91])">Win</button>
+    <button class="key special" onclick="sendCombo([18, 116])">Alt+F5</button>
+    <button class="key special" onclick="sendCombo([17, 67])">Ctrl+C</button>
+    <button class="key special" onclick="sendCombo([17, 86])">Ctrl+V</button>
+    <button class="key special" onclick="sendCombo([17, 88])">Ctrl+X</button>
+    <button class="key special" onclick="sendCombo([17, 90])">Ctrl+Z</button>
+  </div>
+  <div class="kb-row">
+    <button class="key special" onclick="sendCombo([17, 83])">Ctrl+S</button>
+    <button class="key special" onclick="sendCombo([18, 9])">Alt+Tab</button>
+    <button class="key special" onclick="sendCombo([91, 68])">Win+D</button>
+    <button class="key special" onclick="sendCombo([91, 76])">Win+L</button>
+    <button class="key special" onclick="sendCombo([17, 87])">Ctrl+W</button>
+  </div>
+
+  <div class="kb-divider"></div>
+  <div class="kb-label">NAVİGASYON</div>
+
+  <div class="kb-row">
+    <button class="key" onclick="sendKey(9)">Tab</button>
+    <button class="key wide" onclick="sendKey(32)">Boşluk</button>
+    <button class="key destructive" onclick="sendKey(8)">⌫ Sil</button>
+    <button class="key destructive" onclick="sendKey(46)">Del</button>
+  </div>
+  <div class="kb-row">
+    <button class="key" onclick="sendKey(27)">Esc</button>
+    <button class="key" onclick="sendKey(13)">Enter ↵</button>
+    <button class="key" onclick="sendKey(36)">Home</button>
+    <button class="key" onclick="sendKey(35)">End</button>
+  </div>
+  <div class="kb-row">
+    <button class="key" onclick="sendKey(37)">◀</button>
+    <button class="key" onclick="sendKey(38)">▲</button>
+    <button class="key" onclick="sendKey(40)">▼</button>
+    <button class="key" onclick="sendKey(39)">▶</button>
+  </div>
+
+  <div class="kb-divider"></div>
+  <div class="kb-label">FONKSİYON</div>
+
+  <div class="kb-row">
+    <button class="key" onclick="sendKey(112)">F1</button>
+    <button class="key" onclick="sendKey(113)">F2</button>
+    <button class="key" onclick="sendKey(114)">F3</button>
+    <button class="key" onclick="sendKey(115)">F4</button>
+    <button class="key" onclick="sendKey(116)">F5</button>
+    <button class="key" onclick="sendKey(123)">F12</button>
+  </div>
+</div>
+
+<script>
+// ── WebSocket ──────────────────────────────────────────────
+const wsUrl = `ws://${location.host}/ws`;
+let ws = null;
+let connected = false;
+let reconnectTimer = null;
+
+function connect() {
+  ws = new WebSocket(wsUrl);
+
+  ws.onopen = () => {
+    connected = true;
+    document.getElementById('overlay-connect').classList.add('hidden');
+    document.getElementById('status-dot').classList.add('online');
+    document.getElementById('status-text').textContent = 'Bağlı';
+    if (reconnectTimer) clearTimeout(reconnectTimer);
+  };
+
+  ws.onclose = () => {
+    connected = false;
+    document.getElementById('overlay-connect').classList.remove('hidden');
+    document.getElementById('status-dot').classList.remove('online');
+    document.getElementById('status-text').textContent = 'Bağlı değil';
+    reconnectTimer = setTimeout(connect, 2500);
+  };
+
+  ws.onerror = () => ws.close();
+}
+
+function send(payload) {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: 'REMOTE_INPUT', payload }));
+  }
+}
+
+// ── Tab switch ─────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+// ── Trackpad ───────────────────────────────────────────────
+const pad = document.getElementById('trackpad');
+const hint = document.getElementById('trackpad-hint');
+let lastX = null, lastY = null;
+let lastTap = 0;
+let touchCount = 0;
+
+pad.addEventListener('touchstart', e => {
+  e.preventDefault();
+  touchCount = e.touches.length;
+  if (touchCount === 1) {
+    lastX = e.touches[0].clientX;
+    lastY = e.touches[0].clientY;
+    hint.style.opacity = '0';
+
+    // Show ripple
+    showRipple(lastX, lastY);
+  } else if (touchCount === 2) {
+    lastX = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+    lastY = lastX;
+  }
+}, { passive: false });
+
+pad.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (touchCount === 1 && e.touches.length === 1) {
+    const nx = e.touches[0].clientX;
+    const ny = e.touches[0].clientY;
+    const dx = (nx - lastX) * 1.8;
+    const dy = (ny - lastY) * 1.8;
+    if (Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1) {
+      send({ action: 'move', dx, dy });
+    }
+    lastX = nx; lastY = ny;
+  } else if (touchCount === 2 && e.touches.length === 2) {
+    // Two-finger scroll
+    const ny = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+    const delta = (lastY - ny) / 30;
+    if (Math.abs(delta) > 0.01) {
+      send({ action: 'scroll', scroll: delta });
+    }
+    lastY = ny;
+  }
+}, { passive: false });
+
+pad.addEventListener('touchend', e => {
+  e.preventDefault();
+  if (e.changedTouches.length === 1 && touchCount === 1) {
+    const now = Date.now();
+    if (now - lastTap < 300) {
+      // Double tap = double click
+      send({ action: 'left_click' });
+      send({ action: 'left_click' });
+    }
+    lastTap = now;
+  }
+  lastX = null; lastY = null;
+}, { passive: false });
+
+function showRipple(x, y) {
+  const rect = pad.getBoundingClientRect();
+  const el = document.createElement('div');
+  el.className = 'ripple-dot';
+  el.style.left = (x - rect.left) + 'px';
+  el.style.top = (y - rect.top) + 'px';
+  pad.appendChild(el);
+  setTimeout(() => el.remove(), 400);
+}
+
+// ── Mouse Buttons ──────────────────────────────────────────
+function btnDown(id) { document.getElementById(id).classList.add('pressed'); }
+function leftClick()  { document.getElementById('btn-left').classList.remove('pressed'); send({ action: 'left_click' }); }
+function rightClick() { document.getElementById('btn-right').classList.remove('pressed'); send({ action: 'right_click' }); }
+
+// ── Scroll ─────────────────────────────────────────────────
+function scrollPage(delta) { send({ action: 'scroll', scroll: delta }); }
+
+// ── Keyboard ───────────────────────────────────────────────
+function sendKey(keyCode) {
+  send({ action: 'key_down', keyCode });
+  setTimeout(() => send({ action: 'key_up', keyCode }), 50);
+}
+
+function sendCombo(keys) {
+  // Press all keys down
+  keys.forEach(k => send({ action: 'key_down', keyCode: k }));
+  // Release all in reverse
+  setTimeout(() => {
+    [...keys].reverse().forEach(k => send({ action: 'key_up', keyCode: k }));
+  }, 80);
+}
+
+function sendShortcut(keys) { sendCombo(keys); }
+
+function sendText() {
+  const input = document.getElementById('text-input');
+  const text = input.value;
+  if (!text) return;
+  // Type each character using key events
+  for (const char of text) {
+    const code = char.toUpperCase().charCodeAt(0);
+    sendKey(code);
+  }
+  // Press Enter
+  setTimeout(() => sendKey(13), text.length * 60 + 100);
+  input.value = '';
+}
+
+// ── Init ───────────────────────────────────────────────────
+document.getElementById('connect-addr').textContent = location.host;
+connect();
+</script>
+</body>
+</html>

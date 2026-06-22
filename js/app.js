@@ -249,3 +249,10 @@ document.addEventListener('DOMContentLoaded', () => {
   window.monitorMode   = new MonitorMode();
   window.app           = new App();
 });
+
+window.openRemotePage = function() {
+  const ip = document.getElementById('val-ip')?.textContent ?? location.hostname;
+  const port = location.port;
+  const url = `http://${ip}${port ? ':' + port : ''}/remote.html`;
+  window.open(url, '_blank');
+};

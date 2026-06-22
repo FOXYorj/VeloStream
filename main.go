@@ -122,6 +122,19 @@ func handleFrontendMessage(hub *Hub, msg WsMessage, clientID string) {
 		if msg.TargetID != "" {
 			hub.broadcast <- msg
 		}
+
+	case "REMOTE_INPUT":
+		// Handle remote control input from mobile - execute on local PC
+		if payload, ok := msg.Payload.(map[string]interface{}); ok {
+			ri := RemoteInput{}
+			if v, ok := payload["action"].(string); ok { ri.Action = v }
+			if v, ok := payload["dx"].(float64); ok { ri.DX = v }
+			if v, ok := payload["dy"].(float64); ok { ri.DY = v }
+			if v, ok := payload["scroll"].(float64); ok { ri.Scroll = v }
+			if v, ok := payload["keyCode"].(float64); ok { ri.KeyCode = int(v) }
+			if v, ok := payload["text"].(string); ok { ri.Text = v }
+			handleRemoteInput(ri)
+		}
 	}
 }
 
