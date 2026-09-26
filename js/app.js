@@ -142,7 +142,12 @@ class App {
 
       // Send to backend
       if (this._ws && this._ws.readyState === WebSocket.OPEN) {
-        this._ws.send(JSON.stringify({ type: 'START_STREAM', payload: {} }));
+        const fps = parseInt(localStorage.getItem('velo_fps') || '60');
+        const res = parseInt(localStorage.getItem('velo_res') || '1080');
+        this._ws.send(JSON.stringify({ 
+          type: 'START_STREAM', 
+          payload: { res, fps } 
+        }));
       }
     });
 
@@ -237,6 +242,54 @@ class App {
       const orig = btn.innerHTML;
       btn.innerHTML = `<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg> Copied`;
       setTimeout(() => { btn.innerHTML = orig; }, 2000);
+    });
+  }
+
+  openSettings() {
+    const currentRes = localStorage.getItem('velo_res') || '1080';
+    const currentFps = localStorage.getItem('velo_fps') || '60';
+
+    const modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:10000; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(5px);';
+    
+    modal.innerHTML = `
+      <div class="card" style="background:var(--bg-card); padding:30px; text-align:left; width:350px; border:1px solid var(--border-color); border-radius:16px; position:relative;">
+        <button onclick="this.parentElement.parentElement.remove()" style="position:absolute; top:15px; right:15px; background:none; border:none; color:var(--text-muted); cursor:pointer;">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+        </button>
+        <h3 style="color:#fff; margin-bottom:20px; font-size:18px;">Yayın Ayarları</h3>
+        
+        <div style="margin-bottom:15px;">
+          <label style="display:block; color:var(--text-muted); font-size:12px; margin-bottom:6px;">Çözünürlük Kalitesi</label>
+          <select id="set-res" style="width:100%; padding:10px; border-radius:8px; background:rgba(255,255,255,0.05); color:#fff; border:1px solid var(--border-color); outline:none;">
+            <option value="720" ${currentRes==='720'?'selected':''}>720p (Akıcı)</option>
+            <option value="1080" ${currentRes==='1080'?'selected':''}>1080p (Standart)</option>
+            <option value="1440" ${currentRes==='1440'?'selected':''}>1440p (2K)</option>
+            <option value="2160" ${currentRes==='2160'?'selected':''}>2160p (4K)</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom:25px;">
+          <label style="display:block; color:var(--text-muted); font-size:12px; margin-bottom:6px;">Kare Hızı (FPS)</label>
+          <select id="set-fps" style="width:100%; padding:10px; border-radius:8px; background:rgba(255,255,255,0.05); color:#fff; border:1px solid var(--border-color); outline:none;">
+            <option value="30" ${currentFps==='30'?'selected':''}>30 FPS</option>
+            <option value="60" ${currentFps==='60'?'selected':''}>60 FPS</option>
+            <option value="90" ${currentFps==='90'?'selected':''}>90 FPS</option>
+            <option value="120" ${currentFps==='120'?'selected':''}>120 FPS (Sınırları Zorla)</option>
+          </select>
+        </div>
+
+        <button id="btn-save-settings" class="btn btn-primary" style="width:100%; justify-content:center;">Kaydet</button>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+
+    document.getElementById('btn-save-settings').addEventListener('click', () => {
+      localStorage.setItem('velo_res', document.getElementById('set-res').value);
+      localStorage.setItem('velo_fps', document.getElementById('set-fps').value);
+      modal.remove();
+      alert('Ayarlar kaydedildi! Değişikliklerin aktif olması için mevcut yayını durdurup tekrar başlatın.');
     });
   }
 }

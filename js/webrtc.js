@@ -23,10 +23,19 @@ class WebRTCManager {
         return false;
       }
 
+      const targetFps = parseInt(localStorage.getItem('velo_fps') || '60');
+      const targetRes = parseInt(localStorage.getItem('velo_res') || '1080');
+      
+      let height = 1080;
+      if (targetRes === 720) height = 720;
+      else if (targetRes === 1440) height = 1440;
+      else if (targetRes === 2160) height = 2160;
+
       this.localStream = await navigator.mediaDevices.getDisplayMedia({
         video: { 
           cursor: "always", 
-          frameRate: 60,
+          frameRate: { ideal: targetFps, max: targetFps },
+          height: { ideal: height },
           displaySurface: "monitor"
         },
         audio: true
@@ -115,9 +124,23 @@ class WebRTCManager {
 
     const pc = this._createPeerConnection(senderID);
 
+    // Set dynamic max bitrate based on quality setting
+    const targetRes = parseInt(localStorage.getItem('velo_res') || '1080');
+    let maxBitrate = 12000000; // 12 Mbps default for 1080p
+    if (targetRes === 720) maxBitrate = 5000000;       // 5 Mbps
+    else if (targetRes === 1440) maxBitrate = 25000000; // 25 Mbps
+    else if (targetRes === 2160) maxBitrate = 50000000; // 50 Mbps
+
     // Add local stream tracks to PC
     this.localStream.getTracks().forEach(track => {
-      pc.addTrack(track, this.localStream);
+      const sender = pc.addTrack(track, this.localStream);
+      if (track.kind === 'video') {
+        const params = sender.getParameters();
+        if (!params.encodings) params.encodings = [{}];
+        params.encodings[0].maxBitrate = maxBitrate;
+        // setParameters might throw if unsupported, so wrap in try-catch
+        sender.setParameters(params).catch(e => console.warn('Bitrate set failed:', e));
+      }
     });
 
     await pc.setRemoteDescription(new RTCSessionDescription(offer));

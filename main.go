@@ -102,14 +102,31 @@ func handleFrontendMessage(hub *Hub, msg WsMessage, clientID string) {
 	switch msg.Type {
 	case "START_STREAM":
 		streamID := "stream-" + clientID
+		
+		resStr := "1080p"
+		fpsVal := 60
+		bitrateVal := 12.0
+		
+		if payload, ok := msg.Payload.(map[string]interface{}); ok {
+			if r, ok := payload["res"].(float64); ok {
+				if r == 720 { resStr = "720p"; bitrateVal = 5.0 }
+				if r == 1080 { resStr = "1080p"; bitrateVal = 12.0 }
+				if r == 1440 { resStr = "2K"; bitrateVal = 25.0 }
+				if r == 2160 { resStr = "4K"; bitrateVal = 50.0 }
+			}
+			if f, ok := payload["fps"].(float64); ok {
+				fpsVal = int(f)
+			}
+		}
+
 		stream := Stream{
 			ID:      streamID,
 			Title:   "Stream " + clientID[:4],
 			To:      "All Peers",
-			Res:     "1080p",
+			Res:     resStr,
 			Codec:   "VP9",
-			FPS:     60,
-			Bitrate: 10.0,
+			FPS:     fpsVal,
+			Bitrate: bitrateVal,
 		}
 		hub.AddStream(stream)
 
