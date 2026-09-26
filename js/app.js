@@ -251,9 +251,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 window.openRemotePage = function() {
-  const ip = document.getElementById('val-ip')?.textContent && document.getElementById('val-ip').textContent !== '?' 
-    ? document.getElementById('val-ip').textContent 
-    : location.hostname;
+  const ipText = document.getElementById('val-ip')?.textContent;
+  const ip = (ipText && ipText !== '?' && ipText !== '—') ? ipText : location.hostname;
   const port = location.port || '8080';
   const url = `http://${ip}:${port}/remote.html`;
 
