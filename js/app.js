@@ -251,8 +251,50 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 window.openRemotePage = function() {
-  const ip = document.getElementById('val-ip')?.textContent ?? location.hostname;
-  const port = location.port;
-  const url = `http://${ip}${port ? ':' + port : ''}/remote.html`;
-  window.open(url, '_blank');
+  const ip = document.getElementById('val-ip')?.textContent && document.getElementById('val-ip').textContent !== '?' 
+    ? document.getElementById('val-ip').textContent 
+    : location.hostname;
+  const port = location.port || '8080';
+  const url = `http://${ip}:${port}/remote.html`;
+
+  // Mobil cihazdan girildiyse doğrudan aç
+  if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+    window.location.href = url;
+    return;
+  }
+
+  // PC'den girildiyse QR Kod göster
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
+  
+  // Varsa eskisini sil
+  const oldModal = document.getElementById('qr-modal');
+  if (oldModal) oldModal.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'qr-modal';
+  modal.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:10000; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(5px);';
+  
+  modal.innerHTML = `
+    <div class="card" style="background:var(--bg-card); padding:30px; text-align:center; max-width:350px; border:1px solid var(--border-color); border-radius:16px; position:relative;">
+      <button onclick="this.parentElement.parentElement.remove()" style="position:absolute; top:15px; right:15px; background:none; border:none; color:var(--text-muted); cursor:pointer;">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+      </button>
+      <h3 style="color:#fff; margin-bottom:10px; font-size:18px;">Telefonunuzdan Okutun</h3>
+      <p style="color:var(--text-muted); font-size:13px; margin-bottom:20px;">
+        Telefonunuzun kamerasını açıp aşağıdaki QR kodu okutarak Uzaktan Kontrol paneline anında bağlanabilirsiniz.
+      </p>
+      <div style="background:#fff; padding:15px; border-radius:12px; display:inline-block; margin-bottom:20px;">
+        <img src="${qrUrl}" alt="QR Code" style="width:200px; height:200px; display:block;" />
+      </div>
+      <div style="background:rgba(0,212,232,0.1); color:var(--cyan); padding:10px; border-radius:8px; font-family:monospace; font-size:13px; word-break:break-all;">
+        ${url}
+      </div>
+    </div>
+  `;
+  
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.remove();
+  });
+
+  document.body.appendChild(modal);
 };
